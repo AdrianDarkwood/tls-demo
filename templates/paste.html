@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Paste View</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .debug-info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if expired %}
+            <div class="alert alert-danger" role="alert">
+                ⚠️ This paste has expired or been viewed too many times.
+            </div>
+        {% else %}
+            <h2 class="mb-3">Paste Content</h2>
+            <pre>{{ content }}</pre>
+        {% endif %}
+
+        <div class="debug-info">
+            <h3>Paste Information</h3>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Device/Username:</strong> {{ device_name }}</li>
+                <li class="list-group-item"><strong>Paste ID:</strong> {{ paste_id }}</li>
+                <li class="list-group-item"><strong>Created:</strong> {{ created_at.strftime('%Y-%m-%d %H:%M:%S') if created_at else 'N/A' }}</li>
+                <li class="list-group-item"><strong>Expires At:</strong> {{ expires_at.strftime('%Y-%m-%d %H:%M:%S') if expires_at else 'Never' }}</li>
+                <li class="list-group-item"><strong>Current Time:</strong> {{ now.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                <li class="list-group-item"><strong>View Count:</strong> {{ view_count }} / {{ max_views if max_views else '∞' }}</li>
+            </ul>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Create another paste</a>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
