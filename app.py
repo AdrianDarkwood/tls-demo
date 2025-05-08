@@ -10,17 +10,14 @@ app = Flask(__name__)
 # Configuration
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Database configuration
+# Replace your database configuration section with this:
 if os.environ.get('RENDER'):
-    # Production configuration (Render)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-    admin_password_hash = generate_password_hash(os.environ.get('ADMIN_PASSWORD'))
+    database_url = os.environ.get('DATABASE_URL')
+    if not database_url:
+        raise ValueError("DATABASE_URL environment variable not set for production")
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url.replace('postgres://', 'postgresql://', 1)
 else:
-    # Local development configuration
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pastes.db'
-    app.config['SECRET_KEY'] = 'your_dev_secret_key_here'  # Change this for local development
-    admin_password_hash = generate_password_hash('armaan')  # Change this for local development
 
 db.init_app(app)
 
