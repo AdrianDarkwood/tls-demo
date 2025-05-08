@@ -18,12 +18,17 @@ if os.environ.get('RENDER'):
         raise ValueError("DATABASE_URL environment variable not set for production")
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url.replace('postgres://', 'postgresql://', 1)
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-    admin_password_hash = generate_password_hash(os.environ.get('ADMIN_PASSWORD'))
+    
+    # Get admin password from environment and generate hash
+    admin_password = os.environ.get('ADMIN_PASSWORD')
+    if not admin_password:
+        raise ValueError("ADMIN_PASSWORD environment variable not set for production")
+    ADMIN_PASSWORD_HASH = generate_password_hash(admin_password)
 else:
     # Local development configuration
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pastes.db'
-    app.config['SECRET_KEY'] = 'your_dev_secret_key_here'  # Change for local development
-    admin_password_hash = generate_password_hash('armaan')  # Change for local development
+    app.config['SECRET_KEY'] = 'dev-secret-key'  # Change for development
+    ADMIN_PASSWORD_HASH = generate_password_hash('dev-admin-password')  # Change for development
 
 db.init_app(app)
 
@@ -83,7 +88,7 @@ def view_paste(paste_id):
 def admin():
     if request.method == 'POST':
         password = request.form['password']
-        if check_password_hash(admin_password_hash, password):
+        if check_password_hash(ADMIN_PASSWORD_HASH, password):
             pastes = Paste.query.order_by(Paste.created_at.desc()).all()
             return render_template('admin.html', pastes=pastes, current_time=datetime.utcnow())
         else:
@@ -104,4 +109,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=not os.environ.get('RENDER'))  # Disable debug in production
+    app.run(debug=not os.environ.get('RENDER'))
