@@ -10,14 +10,20 @@ app = Flask(__name__)
 # Configuration
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Replace your database configuration section with this:
+# Database configuration
 if os.environ.get('RENDER'):
+    # Production configuration (Render)
     database_url = os.environ.get('DATABASE_URL')
     if not database_url:
         raise ValueError("DATABASE_URL environment variable not set for production")
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+    admin_password_hash = generate_password_hash(os.environ.get('ADMIN_PASSWORD'))
 else:
+    # Local development configuration
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pastes.db'
+    app.config['SECRET_KEY'] = 'your_dev_secret_key_here'  # Change for local development
+    admin_password_hash = generate_password_hash('armaan')  # Change for local development
 
 db.init_app(app)
 
@@ -37,7 +43,8 @@ def index():
             content=content,
             device_name=device_name,
             expires_at=expires_at,
-            max_views=max_views
+            max_views=max_views,
+            view_count=0  # Initialize view_count
         )
         
         db.session.add(new_paste)
@@ -97,4 +104,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=not os.environ.get('RENDER'))  # Disable debug in production
